@@ -11,8 +11,8 @@ public class KeyGenerator {
 		KeyPairGenerator kpg;
 		kpg = KeyPairGenerator.getInstance("EC", "SunEC");
 		ECGenParameterSpec ecsp;
-		//ecsp = new ECGenParameterSpec("secp256k1");
-		ecsp = new ECGenParameterSpec("secp192r1");
+		ecsp = new ECGenParameterSpec("secp256k1");
+		//ecsp = new ECGenParameterSpec("secp192r1");
 		kpg.initialize(ecsp);
 		
 		KeyPair kp = kpg.genKeyPair();
