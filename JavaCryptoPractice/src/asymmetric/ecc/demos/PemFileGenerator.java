@@ -53,7 +53,7 @@ public class PemFileGenerator{
 		ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
 		ECPublicKey pub = (ECPublicKey) keyPair.getPublic();
 		
-		writePemFile(priv, "ECC PRIVATE KEY", "private.pem");
+		writePemFile(priv, "ECC PRIVATE KEY", "private.key");
 		writePemFile(pub, "ECC PUBLIC KEY", "public.pem");
 		
 	}
