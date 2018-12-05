@@ -16,6 +16,14 @@ import java.security.spec.*;
 import java.util.Arrays;
 
 /*
+* Openssl generate private keys in PKCS#1 by default,but Java doesn't support PKCS#1 with the following header and footer:
+* -----BEGIN RSA PUBLIC KEY-----
+* -----END RSA PUBLIC KEY-----
+* instead, supports PKCS#8 with the following header and footer:
+* -----BEGIN PRIVATE KEY-----
+* -----END PRIVATE KEY-----
+* so, we need to convert private key from PKCS#1 to PKCS#8 first with the following command:
+*  openssl pkcs8 -topk8 -inform pem -in private.pem -outform PEM -nocrypt -out private8.pem
 * reference: https://stackoverflow.com/questions/11787571/how-to-read-pem-file-to-get-private-and-public-key
 * */
 
@@ -33,22 +41,15 @@ public class PemFileParser {
         dis.readFully(keyBytes);
         dis.close();
         String temp = new String(keyBytes);
-        String privKeyPEM = temp.replace("-----BEGIN ECC PRIVATE KEY-----", "");
-        privKeyPEM = privKeyPEM.replace("-----END ECC PRIVATE KEY-----", "");
-        //System.out.println(privKeyPEM);
+        String privKeyPEM = temp.replace("-----BEGIN PRIVATE KEY-----", "");
+        privKeyPEM = privKeyPEM.replace("-----END PRIVATE KEY-----", "");
+        System.out.println(privKeyPEM);
 
         Base64 b64 = new Base64();
         byte [] decoded = b64.decode(privKeyPEM);
-
-        //byte[] keyBytes = Files.readAllBytes(new File(filename).toPath());
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(decoded);
-        //ECPrivateKeySpec spec = new ECPrivateKeySpec(keyBytes);
-        //X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
 
         KeyFactory kf = KeyFactory.getInstance("EC", "SunEC");
-        //ECGenParameterSpec ecsp;
-        //ecsp = new ECGenParameterSpec("secp256k1");
-
         return kf.generatePrivate(spec);
     }
 
@@ -62,9 +63,9 @@ public class PemFileParser {
         dis.close();
 
         String temp = new String(keyBytes);
-        String publicKeyPEM = temp.replace("-----BEGIN ECC PUBLIC KEY-----", "");
-        publicKeyPEM = publicKeyPEM.replace("-----END ECC PUBLIC KEY-----", "");
-        //System.out.println(publicKeyPEM);
+        String publicKeyPEM = temp.replace("-----BEGIN PUBLIC KEY-----", "");
+        publicKeyPEM = publicKeyPEM.replace("-----END PUBLIC KEY-----", "");
+        System.out.println(publicKeyPEM);
 
         Base64 b64 = new Base64();
         byte [] decoded = b64.decode(publicKeyPEM);
@@ -77,8 +78,8 @@ public class PemFileParser {
 
     public static void main(String[] args){
         try {
-            URL privKeyPem = PemFileParser.class.getClassLoader().getResource("private.key");
-            URL pubKeyPem = PemFileParser.class.getClassLoader().getResource("public.pem");
+            URL privKeyPem = PemFileParser.class.getClassLoader().getResource("myPrivKey.pkcs8");
+            URL pubKeyPem = PemFileParser.class.getClassLoader().getResource("myPubKey.pem");
             //System.out.println(privKeyPem.getPath());
 
             PrivateKey privKey = getPrivateKey(privKeyPem.getPath());
@@ -93,15 +94,15 @@ public class PemFileParser {
 
             byte[] encrypted = encryptCipher.doFinal(textBytes);
 
-            System.out.println("Encryted: 0x" + (new BigInteger(1, encrypted).toString(16).toUpperCase()));
-            System.out.println("Encryted: 0x" + Arrays.toString(encrypted));
+            System.out.println("Encrypted: 0x" + (new BigInteger(1, encrypted).toString(16).toUpperCase()));
+            System.out.println("Encrypted: 0x" + Arrays.toString(encrypted));
 
             Cipher decryptCipher = Cipher.getInstance("ECIES", "BC");
             decryptCipher.init(Cipher.DECRYPT_MODE, privKey);
 
             byte[] decrypted = decryptCipher.doFinal(encrypted);
 
-            System.out.println("Decryted: " + new String(decrypted));
+            System.out.println("Decrypted: " + new String(decrypted));
 
         }catch (IOException ioe){
             System.out.println("Caught IOException");
@@ -118,6 +119,7 @@ public class PemFileParser {
         }catch (BadPaddingException bpe){
             System.out.println("Caught BadPaddingException");
         }catch (Exception e){
+            e.printStackTrace();
             System.out.println("Caught other exception");
         }
     }

@@ -30,7 +30,7 @@ class PemFile {
 		this.pemObject = new PemObject(description, key.getEncoded());
 	}
 	
-	public void write(String filename) throws FileNotFoundException, IOException {
+	public void write(String filename) throws IOException {
 		PemWriter pemWriter = new PemWriter(new OutputStreamWriter(new FileOutputStream(filename)));
 		try {
 			pemWriter.writeObject(this.pemObject);
@@ -45,7 +45,7 @@ public class PemFileGenerator{
 	
 	public static final int KEY_SIZE = 1024;
  
-	public static void main(String[] args) throws InvalidAlgorithmParameterException, FileNotFoundException, IOException, NoSuchAlgorithmException, NoSuchProviderException {
+	public static void main(String[] args) throws InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, NoSuchProviderException {
 		Security.addProvider(new BouncyCastleProvider());
 		LOGGER.info("BouncyCastle provider added.");
 		
@@ -53,8 +53,8 @@ public class PemFileGenerator{
 		ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
 		ECPublicKey pub = (ECPublicKey) keyPair.getPublic();
 		
-		writePemFile(priv, "ECC PRIVATE KEY", "private.key");
-		writePemFile(pub, "ECC PUBLIC KEY", "public.pem");
+		writePemFile(priv, "PRIVATE KEY", "private.key");
+		writePemFile(pub, "PUBLIC KEY", "public.pem");
 		
 	}
  
@@ -72,7 +72,7 @@ public class PemFileGenerator{
 	}
  
 	private static void writePemFile(Key key, String description, String filename)
-			throws FileNotFoundException, IOException {
+			throws IOException {
 		PemFile pemFile = new PemFile(key, description);
 		pemFile.write(filename);
 		
