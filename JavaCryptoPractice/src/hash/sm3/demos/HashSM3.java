@@ -1,11 +1,13 @@
 package hash.sm3.demos;
 
-//import com.google.common.io.BaseEncoding;
+import com.google.common.io.BaseEncoding;
 import com.tenpay.smAlgo.SM3Algo;
+import org.bouncycastle.jcajce.provider.digest.SM3;
+
 import java.io.UnsupportedEncodingException;
 
 public class HashSM3 {
-    //public static final BaseEncoding HEX = BaseEncoding.base16().lowerCase();
+    public static final BaseEncoding HEX = BaseEncoding.base16().lowerCase();
     public static final int cNumber = 1;   // client number
     public static final int tNumber = 100000;  // task nmuber
 
@@ -37,8 +39,10 @@ public class HashSM3 {
                     for (int j = 0; j < task; j++){
                         SM3Algo sm3Algo = new SM3Algo();
                         sm3Algo.update(input);
-                        sm3Algo.digest();
-                        //System.out.println(Thread.currentThread().getName() + "-Task-" + j + ": " + HEX.encode(sm3Algo.digest()));
+                        byte[] digest = sm3Algo.digest();
+                        SM3Algo sm3Algo1 = new SM3Algo();
+                        sm3Algo1.update(digest);
+                        System.out.println(Thread.currentThread().getName() + "-Task-" + j + ": " + HEX.encode(sm3Algo1.digest()));
                     }
                 }
             }, "Client-" + i);
